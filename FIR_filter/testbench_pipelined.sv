@@ -15,7 +15,7 @@ module testbench_pipelined();
     localparam real test_freqs[0:NUM_FREQ_TESTS-1] = {0, 0.025, 0.05, 0.075, 0.1, 0.105, 0.110, 0.115, 0.125, 0.15, 0.175, 0.2, 0.3, 0.4};
 
     logic clk;
-	logic rst = 1'b1;
+    logic rst = 1'b1;
     logic input_go = 1'b0;
     real input_period_ns = 0;
     real input_period_ns_loop = 0;
@@ -27,16 +27,16 @@ module testbench_pipelined();
     logic signed[OUT_WIDTH-1:0] max_y;
 
     // Instantiate the FIR filter
-	Pipelined_FIR_Filter #(.IN_WIDTH(IN_WIDTH), .OUT_WIDTH(OUT_WIDTH)) dut_pipelined(clk, x, y);
+    Pipelined_FIR_Filter #(.IN_WIDTH(IN_WIDTH), .OUT_WIDTH(OUT_WIDTH)) dut_pipelined(clk, x, y);
 
     // Provide the test inputs
-	initial
+    initial
     begin
         // ----- PIPELINED FILTER TESTS ---------------------------------------------------------------
         // save results to csv files so freq response can be graphed in excel
-        int fd = $fopen("results_pipelined.csv", "w");
+        int fd = $fopen("testbench_results/results_pipelined.csv", "w");
 
-        $fwrite(fd, "Sample period, %dns\n", CLK_PERIOD_NS);
+        $fwrite(fd, "Sample period, %0dns\n", CLK_PERIOD_NS);
         $fwrite(fd, "Input period (ns), Input frequency, Output magnitude, Output magnitude (db)\n");
 
         // measure output magnitude with various frequency inputs
@@ -53,7 +53,7 @@ module testbench_pipelined();
             end
 
             // read maximum output magnitude over 2*input_period_ns clock cycles
-            if (input_period_ns != 0) input_period_ns_loop = 10;
+            if (input_period_ns == 0) input_period_ns_loop = 10;
             else input_period_ns_loop = input_period_ns;
             max_y = y;
             for (int j = 0; j < 2*input_period_ns_loop; j++) begin
@@ -91,10 +91,8 @@ module testbench_pipelined();
                 x <= {1'b0, (IN_WIDTH-1)'('1)};
             end else begin
                 // CLK_PERIOD_NS have passed since the last update of the input
-                // this is CLK_PERIOD_NS out of an input period of T = input_period_ns
-                // therefore, need to add (CLK_PERIOD_NS/input_period_ns)*2pi radians
-
-                // update radians measurement
+                // need to add (CLK_PERIOD_NS/input_period_ns)*2pi radians
+                // to update the radians input
                 radians = radians + real'(real'(CLK_PERIOD_NS)/input_period_ns)*real'(2*pi);
 
                 sine_analog = $sin(radians);

@@ -16,12 +16,8 @@ freqz(quantized_coeffs, 1);
 
 % save coefficients as a verilog array
 exportCoefficients("filter_parameters.sv", quantized_coeffs, w, f);
-% TODO: testing, remove these:
-x = ones(500,1);
-x_fi = fi(x, 1, 16,15);
-q = fi(quantized_coeffs,1,w,f);
-r = conv(x_fi,q)
 
+% Export coefficients as systemverilog parameters
 function exportCoefficients(filename, quantized_coeffs, w, f)
     q = fi(quantized_coeffs,1,w,f);
     % start parameter declarations
@@ -44,7 +40,7 @@ function exportCoefficients(filename, quantized_coeffs, w, f)
 end
 
 % FILTER_DESIGN Returns a discrete-time filter object.
-% Generated with MATLAB's filterDesigner with some manual modifications by me
+% Generated with MATLAB's filterDesigner
 function coeffs = design_filter
 
 % MATLAB Code
