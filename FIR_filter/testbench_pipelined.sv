@@ -15,7 +15,6 @@ module testbench_pipelined();
     localparam real test_freqs[0:NUM_FREQ_TESTS-1] = {0, 0.025, 0.05, 0.075, 0.1, 0.105, 0.110, 0.115, 0.125, 0.15, 0.175, 0.2, 0.3, 0.4};
 
     logic clk;
-    logic rst = 1'b1;
     logic input_go = 1'b0;
     real input_period_ns = 0;
     real input_period_ns_loop = 0;
@@ -81,7 +80,6 @@ module testbench_pipelined();
     end
 
     // Generate input with a period equal to input_period_ns
-    real increment = 0;
     always @(posedge clk)
     begin
         if (input_go == 1'b1) begin
@@ -100,7 +98,7 @@ module testbench_pipelined();
                 if (sine_analog == 1)
                     x = {1'b0, (IN_WIDTH-1)'('1)};
                 else
-                    // convert to 16-bit fixed point
+                    // convert to 16-bit fixed point with 15 fraction bits
                     // first multiply it by the scale factor, then convert to an integer and use the lower IN_WIDTH bits
                     x = 16'($rtoi(sine_analog * real'(2**(IN_WIDTH-1))));
             end
