@@ -1,5 +1,4 @@
 package typedef_pkg;
-    // in order for synopsys design compiler to work, have to change 149 to 49 if L=3 and 74 if L=2
     typedef logic signed[15:0] subfilter_arr_t[149:0]; // assumes COEFF_WIDTH = 16
 endpackage
 import typedef_pkg::subfilter_arr_t;

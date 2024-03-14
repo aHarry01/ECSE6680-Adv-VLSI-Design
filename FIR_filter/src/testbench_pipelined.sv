@@ -3,7 +3,7 @@
 /* Pipedlined FIR filter Testbench */
 module testbench_pipelined();
     `include "filter_parameters.sv"
-    localparam int CLK_PERIOD_NS = 50; // 50ns period/20MHz sampling rate, this is just about the maximum based on synopsys timing report
+    localparam int CLK_PERIOD_NS = 50; // 50ns period/20MHz sampling rate
     localparam real scale_factor = 1/real'(2**30); // 30 fraction bits in the fixed point representation of the output (15 fraction bits in coefficients and inputs)
     localparam IN_WIDTH = 16;
     localparam OUT_WIDTH = 40;
