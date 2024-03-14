@@ -42,7 +42,7 @@ The images below show the reduced-complexity architectures used for L=2 and L=3.
 </figure>
 
 ### Overflow
-The inputs and coefficients are both 16 bits (signed fixed point with 15-bit fractions). Multiplying an input and a coefficient gives at maximum a 32-bit fixed point number with 30 fraction bits to avoid overflow. Then, it adds 150 of these 32-bit numbers which results in a maximum of 32 + ceil(log2(150)) = 40 bits to avoid overflow in the output. In my implementations, the output is 40 bits to ensure that it hold the entire calculated result. However, the output can be made smaller by taking the upper X bits. For example, to get a 16-bit output, it would need to do output16bits = output40bits[39:24].
+The inputs and coefficients are both 16 bits (signed fixed point with 15-bit fractions). Multiplying an input and a coefficient gives at maximum a 32-bit fixed point number with 30 fraction bits to avoid overflow. Then, the filter adds 150 of these 32-bit numbers which results in a maximum of 32 + ceil(log2(150)) = 40 bits to avoid overflow in the output. In my implementations, the output is 40 bits to ensure that it hold the entire calculated result. However, if a smaller output is desired, it can be obtained by keep the upper X bits of the calculated 40-bit value. For example, to get a 16-bit output, it would need to do output16bits = output40bits[39:24]. 
 
 ## Results
 
