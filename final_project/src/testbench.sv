@@ -23,7 +23,7 @@ module testbench();
     localparam logic signed[15:0] GAIN = $rtoi(2**FRAC_BITS * real'(0.6072533210898753)); // 1/cos(a1)cos(a2)...cos(a9)
 
     logic clk;
-    logic signed[15:0] angle, sin, cos;
+    logic signed[15:0] angle, sin, cos, angle_unrolled, sin_unrolled, cos_unrolled;
     real tmp;
 
     // DUTs
@@ -34,6 +34,13 @@ module testbench();
         .cos(cos)
     );
 
+    CORDIC_unrolled #(.GAIN(GAIN), .LENGTH(LENGTH), .ATAN_LUT(ATAN_LUT)) dut_unrolled(
+        .clk(clk),
+        .angle(angle_unrolled),
+        .sin(sin_unrolled),
+        .cos(cos_unrolled)
+    );
+
     initial
     begin
         @(posedge clk);
@@ -41,10 +48,20 @@ module testbench();
             angle = 16'($rtoi(a * 2**FRAC_BITS)); // angle (in radians)
             @(posedge clk);
         end
+
+        for (int i = 0; i < 5; i++) begin
+            @(posedge clk);
+        end
+
+        for(real a = 0; a < 1.5; a+=0.1) begin
+            angle_unrolled = 16'($rtoi(a * 2**FRAC_BITS)); // angle (in radians)
+            @(posedge clk);
+        end
     end
 
     initial
     begin
+        $display("----BASIC CORDIC TEST----");
         @(posedge clk);
         for (int i = 0; i < LENGTH+2; i++) begin
             @(posedge clk);
@@ -61,6 +78,27 @@ module testbench();
             end
 
             tmp = cos/real'(2**FRAC_BITS);
+            $display("cos(%f) = %f", x, tmp);
+
+            if (tmp - $cos(x) > ERROR_TOLERANCE || $cos(x) - tmp > ERROR_TOLERANCE) begin
+                $display("Incorrect cos output: cos(%f) should be %f, not %f", x, $cos(x), tmp);
+            end
+            @(posedge clk);
+        end
+
+        $display("----UNROLLED CORDIC TEST----");
+
+        for(real x = 0; x < 1.5; x+=0.1) begin
+            // TODO: cos
+            // convert fixed point representation to real number
+            tmp = sin_unrolled/real'(2**FRAC_BITS);
+            $display("sin(%f) = %f", x, tmp);
+
+            if (tmp - $sin(x) > ERROR_TOLERANCE || $sin(x) - tmp > ERROR_TOLERANCE) begin
+                $display("Incorrect sin output: sin(%f) should be %f, not %f", x, $sin(x), tmp);
+            end
+
+            tmp = cos_unrolled/real'(2**FRAC_BITS);
             $display("cos(%f) = %f", x, tmp);
 
             if (tmp - $cos(x) > ERROR_TOLERANCE || $cos(x) - tmp > ERROR_TOLERANCE) begin
