@@ -27,12 +27,12 @@ module testbench();
     };
     localparam logic signed[15:0] GAIN = $rtoi(2**FRAC_BITS * real'(0.6072533210898753)); // 1/cos(a1)cos(a2)...cos(a9)
 
-    logic clk, start, busy;
-    logic signed[15:0] angle_iter, sin_iter, cos_iter, angle, sin, cos, angle_2, sin_2, cos_2;
-    real tmp;
+    logic clk, start, busy, start_ser, busy_ser;
+    logic signed[15:0] angle_iter, sin_iter, cos_iter, angle, sin, cos, angle_2, sin_2, cos_2, angle_ser, sin_ser, cos_ser;
+    real tmp, tmp_sin;
 
     // DUTs
-    CORDIC #(.GAIN(GAIN), .LENGTH(LENGTH), .ATAN_LUT(ATAN_LUT)) dut_iterative(
+    CORDIC_iterative #(.GAIN(GAIN), .LENGTH(LENGTH), .ATAN_LUT(ATAN_LUT)) dut_iterative(
         .clk(clk), .start(start), .busy(busy),
         .angle(angle_iter),
         .sin(sin_iter),
@@ -51,6 +51,13 @@ module testbench();
         .angle(angle_2),
         .sin(sin_2),
         .cos(cos_2)
+    );
+
+    CORDIC_bitserial #(.GAIN(GAIN), .LENGTH(LENGTH), .ATAN_LUT(ATAN_LUT)) dut_bitserial(
+        .clk(clk), .start(start_ser), .busy(busy_ser),
+        .angle(angle_ser),
+        .sin(sin_ser),
+        .cos(cos_ser)
     );
 
     initial
@@ -79,6 +86,17 @@ module testbench();
 
         for(real a = 0; a < 1.5; a+=0.1) begin
             angle_2 = 16'($rtoi(a * 2**FRAC_BITS)); // angle (in radians)
+            @(posedge clk);
+        end
+
+        @(posedge clk);
+        for(real a = 0.1; a < 1.5; a+=0.1) begin
+            angle_ser = 16'($rtoi(a * 2**FRAC_BITS)); // angle (in radians)
+            start_ser = 1'b1;
+            @(posedge clk);
+            start_ser = 1'b0;
+            @(posedge clk);
+            wait(busy_ser == 1'b0);
             @(posedge clk);
         end
     end
@@ -145,6 +163,30 @@ module testbench();
             end
 
             tmp = cos_2/real'(2**FRAC_BITS);
+            $display("cos(%f) = %f    OUTPUT ERROR = %f", x, tmp, tmp-$cos(x));
+
+            if (tmp - $cos(x) > ERROR_TOLERANCE || $cos(x) - tmp > ERROR_TOLERANCE) begin
+                $display("Incorrect cos output: cos(%f) should be %f, not %f", x, $cos(x), tmp);
+            end
+        end
+
+        $display("----BIT SERIAL CORDIC TEST----");
+        for(real x = 0.1; x < 1.5; x+=0.1) begin
+            wait(start_ser == 1'b1);
+            @(posedge clk);
+            @(posedge clk);
+            @(posedge clk);
+            wait(busy_ser == 1'b0);
+            @(negedge clk);
+            // convert fixed point representation to real number
+            tmp_sin = sin_ser/real'(2**FRAC_BITS);
+            $display("sin(%f) = %f    OUTPUT ERROR = %f", x, tmp_sin, tmp_sin-$sin(x));
+
+            if (tmp_sin - $sin(x) > ERROR_TOLERANCE || $sin(x) - tmp_sin > ERROR_TOLERANCE) begin
+                $display("Incorrect sin output: sin(%f) should be %f, not %f", x, $sin(x), tmp_sin);
+            end
+
+            tmp = cos_ser/real'(2**FRAC_BITS);
             $display("cos(%f) = %f    OUTPUT ERROR = %f", x, tmp, tmp-$cos(x));
 
             if (tmp - $cos(x) > ERROR_TOLERANCE || $cos(x) - tmp > ERROR_TOLERANCE) begin

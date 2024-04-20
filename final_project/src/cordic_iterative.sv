@@ -1,5 +1,5 @@
 // Iterative implementation of CORDIC
-module CORDIC #(parameter int LENGTH, parameter logic signed[15:0] GAIN, parameter logic signed[15:0] ATAN_LUT[0:LENGTH-1])(
+module CORDIC_iterative #(parameter int LENGTH, parameter logic signed[15:0] GAIN, parameter logic signed[15:0] ATAN_LUT[0:LENGTH-1])(
     input  logic clk, start,
     output logic busy,
     input  logic signed[15:0] angle,
