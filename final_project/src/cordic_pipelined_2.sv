@@ -1,5 +1,5 @@
-// Loop-unrolled CORDIC, L=2 (does 2 iterations every clock cycle)
-module CORDIC_unrolled #(parameter int LENGTH, parameter logic signed[15:0] GAIN, parameter logic signed[15:0] ATAN_LUT[0:LENGTH-1])(
+// Loop-unrolled CORDIC, pipelined registers every 2 iterations
+module CORDIC_pipelined2 #(parameter int LENGTH, parameter logic signed[15:0] GAIN, parameter logic signed[15:0] ATAN_LUT[0:LENGTH-1])(
     input clk,
     input logic signed[15:0] angle,
     output logic signed[15:0] sin, cos
