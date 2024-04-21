@@ -1,10 +1,10 @@
 # CORDIC Algorithm
 
-This project implements the CORDIC algorithm with several different techniques and compares the critical path delay and device utilization on an FPGA. The CORDIC algorithm is a method of computing trigonometric functions using only add and shift operations. Alternative methods of comuting trig functions include lookup tables or polynomial expansions. Lookup tables can be expensive to implement, especially when high accuracy is desired, and polynomial expansions algorithms require many multiplicaitons. Therefore, CORDIC is useful when no hardware multiplier is available or to avoid building a very large lookup table.
+This project implements the CORDIC algorithm with several different techniques and compares the critical path delay and device utilization on an FPGA. The CORDIC algorithm is a method of computing trigonometric functions using only add and shift operations. Alternative methods of computing trig functions include lookup tables or polynomial expansions. Lookup tables can be expensive to implement, especially when high accuracy is desired, and polynomial expansions algorithms require many multiplications. Therefore, CORDIC is useful when no hardware multiplier is available or to avoid building a very large lookup table.
 
 ## CORDIC Overview
 
-CORDIC works by successively rotating a vector until it reaches the desired angle a. Intuitively, it approximates the angle by rotating the vector by angles of decreasing sizes until the vector is pointed in the direction of angle a. It starts with a vector at 0 degrees. If a > 0 degrees, then it rotates counter-clockwise by 0 degrees. Otherwise, it rotates clockwise. Now it has a vector v' at a' = ±45 degrees. During the next iteration, it halves the rotation angle and repeats the process: if a' < a, then it rotates counter-clockwise by 22.5 degrees (actually 26.6), otherwise it rotates clockwise. This process continues for N iterations. Each iteration, the vector is rotated in the direction of angle a and the rotation angle is decreased for the next iteration. At the end, v is approximately in the direction of angle a.
+CORDIC works by successively rotating a vector until it reaches the desired angle a. Intuitively, it approximates the angle by rotating the vector by angles of decreasing sizes until the vector is pointed in the direction of angle a. It starts with a vector at 0 degrees. If a > 0 degrees, then it rotates counter-clockwise by 0 degrees. Otherwise, it rotates clockwise. Now it has a vector v' at a' = ±45 degrees. During the next iteration, it decreases the rotation angle and repeats the process: if a' < a, then it rotates counter-clockwise by 26.6 degrees, otherwise it rotates clockwise. This process continues for N iterations. Each iteration, the vector is rotated in the direction of angle a and the rotation angle is decreased for the next iteration. At the end, v is approximately in the direction of angle a.
 
 To implement this, we need a way to rotate the vector efficiently. After rotating a vector v = (x,y) counter-clockwise by angle $\phi$, the resulting vector is v' = (x',y') = (cos($\phi$)(x-ytan($\phi$)), cos($\phi$)(y+xtan($\phi$))). Computing x' and y' requires a multiplication by tan($\phi$) and cos($\phi$). To make the multiplcation by tan($\phi$) much more efficient, we can choose $\phi$ such that tan($\phi$) is a multiple of two and the operation becomes a shift instead of a multiply.
 
@@ -17,7 +17,7 @@ The choices for $\phi$ for 4 iterations are shown in the table. The rotation ang
 | 2 | 14.04 | 1/4 |
 | 3 | 4.13 | 1/8 |
 
-Since both x' and y' are multiplied by cos($\phi$) every iteration, there  will be a constant scale factor of S=cos(45)cos(26.57)...cos(atan(1/N)) on the result after N iterations. A division can be avoided by initializing the first vector with a magnitude of S instead of 1. Therefore, the initial vector pointing at 0 degrees will be (S,1).
+Since both x' and y' are multiplied by cos($\phi$) every iteration, there  will be a constant scale factor of S=cos(45)cos(26.57)...cos(atan(1/N)) on the result after N iterations. A division can be avoided by initializing the first vector with a magnitude of S instead of 1. Therefore, the initial vector pointing at 0 degrees will be (S,0).
 
 After N iterations, the output will be sin(a) = y' and cos(a) = x'.
 
@@ -41,7 +41,7 @@ One of the benefits of the iterative implementation is that the accuracy of the 
 
 
 ## Loop Unrolled / Pipelined
-The loop in the previous hardware implementation can be unrolled and pipelined. Each pipeline stage computes one iteration of the CORDIC algorithm. For a configuration requiring N iterations, there are N pipeline stages. This results in N times the hardware of the iterative implementation, so the design will increase in area and power consumption. The latency is still N clock cycles. However, it can now output 1 sample/clock cycle. The counter from the iterative implementation can be removed because the iteraiton number is determined by which pipeline stage the data is at.
+The loop in the previous hardware implementation can be unrolled and pipelined. Each pipeline stage computes one iteration of the CORDIC algorithm. For a configuration requiring N iterations, there are N pipeline stages. This results in N times the hardware of the iterative implementation, so the design will increase in area and power consumption. The latency is still N clock cycles. However, it can now output 1 sample/clock cycle. The counter from the iterative implementation can be removed because the iteration number is determined by which pipeline stage the data is at.
 
 This implementation can be adjusted by changing how many iterations are in each pipeline stage. If the pipeline registers are placed every 2 clock cycles, then the latency becomes N/2 clock cycles with the same amount of hardware. However, because an iteration depends on the output of the previous iteration, this will increase the critical path delay.
 
