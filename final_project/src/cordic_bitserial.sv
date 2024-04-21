@@ -32,26 +32,12 @@ always_ff @(posedge clk) begin
     end
 
     if (iter == 1'b1) begin
-        iter_cnt <= iter_cnt + 1;
         iter <= 1'b0;
 
-        x_shifted_reg <= x_reg >>> iter_cnt;
-        y_shifted_reg <= y_reg >>> iter_cnt;
+        x_shifted_reg <= x_reg; //>> iter_cnt;
+        y_shifted_reg <= y_reg; // >> iter_cnt;
         atan_lut_reg <= ATAN_LUT[iter_cnt];
         angle_diff_sign <= angle_diff_reg[15];
-
-        // // if angle difference is negative, rotate counter-clockwise
-        // if (angle_diff_reg < 0) begin
-        //     angle_diff_reg <= angle_diff_reg + ATAN_LUT[iter_cnt];
-        //     x_reg <= x_reg - (y_reg >>> iter_cnt);
-        //     y_reg <= y_reg + (x_reg >>> iter_cnt);
-        // end
-        // // if angle difference is positive, rotate clockwise
-        // else begin
-        //     angle_diff_reg <= angle_diff_reg - ATAN_LUT[iter_cnt];
-        //     x_reg <= x_reg + (y_reg >>> iter_cnt);
-        //     y_reg <= y_reg - (x_reg >>> iter_cnt);
-        // end
 
         if (iter_cnt == LENGTH) begin
             adding <= 1'b0;
@@ -67,6 +53,7 @@ always_ff @(posedge clk) begin
         if (counter_shift_reg == 16'h0000) begin
             adding <= 1'b0;
             iter <= 1'b1;
+            iter_cnt <= iter_cnt + 1;
         end
 
         if (counter_shift_reg[0] == 1'b0) begin
@@ -85,14 +72,14 @@ end
 BitSerialAdder xAdd (
     .clk(clk), .reset(~adding),
     .addsub(angle_diff_sign), // subtract if angle_diff_reg < 0
-    .bit0(x_reg[0]), .bit1(y_shifted_reg[0]),
+    .bit0(x_reg[0]), .bit1(y_shifted_reg[iter_cnt]),
     .outbit(xAddOut)
 );
 
 BitSerialAdder yAdd (
     .clk(clk), .reset(~adding),
     .addsub(~angle_diff_sign), // subtract if angle_diff_reg > 0
-    .bit0(y_reg[0]), .bit1(x_shifted_reg[0]),
+    .bit0(y_reg[0]), .bit1(x_shifted_reg[iter_cnt]),
     .outbit(yAddOut)
 );
 

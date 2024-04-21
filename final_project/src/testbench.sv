@@ -27,7 +27,7 @@ module testbench();
         // 16'($rtoi($atan(0.00006103515625)*2**FRAC_BITS)),
         // 16'($rtoi($atan(0.000030517578125)*2**FRAC_BITS))
     };
-    localparam logic signed[15:0] GAIN = $rtoi(2**FRAC_BITS * real'(0.6072533210898753)); // 1/cos(a1)cos(a2)...cos(a9)
+    localparam logic signed[15:0] GAIN = $rtoi(2**FRAC_BITS * real'(0.6072533210898753)); // cos(a1)cos(a2)...cos(a9)
 
     logic clk, start, busy, start_ser, busy_ser;
     logic signed[15:0] angle_iter, sin_iter, cos_iter, angle, sin, cos, angle_2, sin_2, cos_2, angle_ser, sin_ser, cos_ser;
