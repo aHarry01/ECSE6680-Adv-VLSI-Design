@@ -32,7 +32,7 @@ The first hardware implementation of CORDIC computes one iteration of the algori
 The diagram shows the computation of a single iteration. The hardware is the same for each iteration, except it needs to track the iteration number n so it knows by how much it should do the bitshifting. This leads to some additional  overhead involved in keeping track of which iteration the algorithm is on.
 
 <figure>
-<p align="center"> <img src="images/hardware.png" alt="drawing" width="100%"/> </p>
+<p align="center"> <img src="images/hardware.PNG" alt="drawing" width="100%"/> </p>
 <figcaption>Image source : https://cnmat.org/~norbert/cordic/node6.html</figcaption>
 </figure>
 
@@ -48,7 +48,7 @@ This implementation can be adjusted by changing how many iterations are in each 
 ## Bit serial
 The previous implementations are bit-parallel because they operate on all the bits at once. In a bit-serial implementation, the additions are computed one bit at a time. Each iteration will take 16 clock cycles to compute the addition of the 16-bit numbers, but the critical path is much faster so it can be driven with a much faster clock. The diagram shows the hardware for a single iteration using bit serial adders.
 <figure>
-<p align="center"> <img src="images/hardware_bitserial.png" alt="drawing" width="100%"/> </p>
+<p align="center"> <img src="images/hardware_bitserial.PNG" alt="drawing" width="100%"/> </p>
 <figcaption>Image source : https://cnmat.org/~norbert/cordic/node8.html</figcaption>
 </figure>
 
